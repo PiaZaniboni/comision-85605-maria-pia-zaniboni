@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { UserModel } from "../models/user.model.js";
+import { User } from "../models/User.model.js";
 
 export const usersRouter = Router();
 
 // GET /api/user
 usersRouter.get("/", async (req, res, next) => {
     try {
-        const users = await UserModel.find().lean();
+        const users = await User.find().lean();
         res.json(users);
     }catch (err) { next(err); }
 
@@ -16,7 +16,7 @@ usersRouter.get("/", async (req, res, next) => {
 usersRouter.get("/:id", async (req, res, next) => {
     try{
         const id = req.params.id;
-        const user = await UserModel.findById( id ).lean();
+        const user = await User.findById( id ).lean();
         if(!user) return res.status(404).json({ error: "User not found" });
         res.json(user);
     }catch (err) { next(err); } 
@@ -25,7 +25,7 @@ usersRouter.get("/:id", async (req, res, next) => {
 // POST /api/users
 usersRouter.post("/", async (req, res, next) => {
     try{
-        const created = await UserModel.create(req.body);
+        const created = await User.create(req.body);
         res.status(201).json(created);
     }catch (err) { next(err); } 
 });
@@ -33,7 +33,7 @@ usersRouter.post("/", async (req, res, next) => {
 // PUT /api/users/:id
 usersRouter.put( "/:id", async(req,res,next)=>{
     try{
-        const updated = await UserModel.findByIdAndUpdate(
+        const updated = await User.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new:true, runValidators:true }
@@ -47,7 +47,7 @@ usersRouter.put( "/:id", async(req,res,next)=>{
 usersRouter.delete( "/id", async( req,res,next ) => {
     try{
         const id = req.params.id;
-        const deleted = await UserModel.findByIdAndDelete(id).lean();
+        const deleted = await User.findByIdAndDelete(id).lean();
         if (!deleted) return res.status(404).json({ error: "User not found" });
         res.status(204).send();
     } catch (err) { next(err);} 

@@ -1,24 +1,41 @@
 
 import express, { json, urlencoded } from 'express';
-import morgan from "morgan";
 import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
 
+import { createSessionMW } from "./config/session.js";
+import { sessionRoutes }  from  "./routes/sessions.routes.js";
+import { protectedRoutes }   from  "./routes/protected.routes.js";
 import { usersRouter } from "./routes/users.routes.js";
-import { erroHandler } from "./middlewares/error.handler.js";
+
+import erroHandler from "./middlewares/error.handler.js";
 
 const app = express();
 
 //middlewares base
-app.use(cors());
+app.use(helmet());
+app.use(cors({origin: true, credentials: true}));
+app.use(morgan("dev")); //Logs https
 app.use(json());
-app.use(morgan("dev"));
 app.use(urlencoded({ extended: true }));
 
-//health
-app.get("/health", (req,res)=> res.json({ok:true}));
+//Sesiones
+app.use(cookieParser());
+app.use(createSessionMW());
+
+//health, ruta para ver que la api esta en funcionamiento
+app.get("/health", (_req,res)=> res.json({ok:true}));
 
 //Router
+app.use("/api/sessions", sessionRoutes);
 app.use("/api/users", usersRouter);
+app.use("/", protectedRoutes);
+
+
+//404
+app.use( (_req, res) => res.status(404).json({ message: 'Page not found' }) );
 
 //Manejo de errores
 app.use(erroHandler);

@@ -57,6 +57,6 @@ mediante un link de Drive**, que contiene las credenciales seguras.
 ## ▶️ Iniciar el Proyecto
 
 ``` bash
-npm start
+npm run start
 ```
 

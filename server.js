@@ -12,7 +12,7 @@ const server = app.listen(PORT, () => {
 });
 
 process.on( 'SIGINT', async () => {
-    console.log('\n👋 Cerrando…');
+    console.log('\n👋 Bye Bye Bye');
     await mongoose.disconnect();
     server.close( () => process.exit(0));
 });

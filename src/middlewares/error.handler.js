@@ -1,7 +1,9 @@
-export function erroHandler ( err, req, res, next ){
-    console.error( "[ERROR]", err );
-    //Errores mongoose
-    if(err?.code === 1100 ) return res.status(409).json({ error: "Email duplicado" });
-    if(err?.code === "ValidationError") return res.status(400).json({ error: err.message });
-    res.status(500).json({ error: "internal_error" });
-}
+/**
+ * Middleware de manejo de errores centralizado
+ */
+
+export default (err, _req, res, _next) => {
+  console.error("[ERROR]", err);
+  const status = err.status || 500;
+  res.status(status).json({ error: err.message || 'Error interno' });
+};
