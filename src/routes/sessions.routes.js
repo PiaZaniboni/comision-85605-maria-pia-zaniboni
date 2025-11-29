@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { User } from "../models/User.model.js";
-//import passport from '../config/passport.js'; 
+import passport from '../config/passport.js'; 
 
 export const sessionRoutes = Router();
 
@@ -31,37 +31,40 @@ sessionRoutes.post('/register', async (req, res, next) => {
     }
 });
 
-// POST LOGIN, verificar credenciales y crear session
-sessionRoutes.post('/login', async (req, res, next) => {
-    try {
-        const { email, password } = req.body || {};
+/* LOGIN (Passport + logs) */
+sessionRoutes.post('/login', (req, res, next) => {
 
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Missing credentials' });
+  passport.authenticate('local', (err, user, _info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid Credentials' });
+    }
+
+    // Seguridad: evitar session fixation → regenerar el id de sesión
+    req.session.regenerate(err2 => {
+      if (err2) {
+        return next(err2);
+      }
+
+      // Integracion Passport ↔ Sesion (crea req.user)
+      req.login(user, err3 => {
+        if (err3) {
+          return next(err3);
         }
-
-        const normEmail = String(email).toLowerCase().trim();
-
-        const user = await User.findOne({ email: normEmail });
-
-        if (!user || !(await user.comparePassword(password))) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        //Previene sesion fixation
-        req.session.regenerate(err => {
-            if (err) return next(err);
-        });
-
+        
         req.session.user = {
-            id: user._id.toString(),
-            email: user.email,
-            first_name: user.first_name,
-            role: user.role || 'user'
+          id:    user._id.toString(),
+          email: user.email,
+          name:  user.first_name + ' ' + user.last_name,
+          role:  user.role || 'user'
         };
+        
         return res.json({ ok: true });
-
-    } catch (e) { next(e); }
+      });
+    });
+  })(req, res, next);
 });
 
 //Rutas privadas

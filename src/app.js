@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import passport from './config/passport.js';
 
 import { createSessionMW } from "./config/session.js";
 import { sessionRoutes }  from  "./routes/sessions.routes.js";
@@ -24,6 +25,10 @@ app.use(urlencoded({ extended: true }));
 //Sesiones
 app.use(cookieParser());
 app.use(createSessionMW());
+
+//Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 //health, ruta para ver que la api esta en funcionamiento
 app.get("/health", (_req,res)=> res.json({ok:true}));
