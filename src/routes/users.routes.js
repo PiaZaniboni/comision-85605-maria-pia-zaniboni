@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { User } from "../models/User.model.js";
 
-export const usersRouter = Router();
+export const usersRoutes = Router();
 
+/* ---------- Middlewares de proteccion ---------- */
 function isAuthenticated(req, res, next) {
     if (req.session?.user) return next();
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ message: 'Not authenticated' });
 }
 
 function authorize(role) {
@@ -18,10 +19,10 @@ function authorize(role) {
     }
 }
 
-usersRouter.get("/me", isAuthenticated,  async (req, res, next) => {
+usersRoutes.get("/me", isAuthenticated,  async (req, res, next) => {
     try {
-        const id = req.session.user.id;
-        if (!id) return res.status(400).json({ error: 'Bad Request: missing user id in session' });
+        const id = req.session.user?.id;
+        if (!id) return res.status(400).json({ error: 'Bad Request: Session without ID: This endpoint reads from the database. Log in with a real user.' });
 
         const user = await User.findById(id).select('first_name last_name email age role').lean();
         if (!user) return res.status(404).json({ error: "User not found" });
@@ -34,7 +35,7 @@ usersRouter.get("/me", isAuthenticated,  async (req, res, next) => {
 
 
 // GET lista (solo admin) /api/user
-usersRouter.get("/", isAuthenticated, authorize('admin'), async (req, res, next) => {
+usersRoutes.get("/", isAuthenticated, authorize('admin'), async (req, res, next) => {
     try {
         const users = await User.find().select('first_name last_name email role age').lean();
         res.json(users);
@@ -42,7 +43,7 @@ usersRouter.get("/", isAuthenticated, authorize('admin'), async (req, res, next)
 });
 
 // GET user by id (solo admin) /api/users/:id
-usersRouter.get("/:id", isAuthenticated, async (req, res, next) => {
+usersRoutes.get("/:id", isAuthenticated, async (req, res, next) => {
     try{
         const id = req.params.id;
         const user = await User.findById( id ).select('first_name last_name email role age').lean();
@@ -52,13 +53,13 @@ usersRouter.get("/:id", isAuthenticated, async (req, res, next) => {
 });
 
 // POST crear usuario (solo admin) /api/users
-usersRouter.post("/", isAuthenticated, authorize('admin'), async (req, res, next) => {
+usersRoutes.post("/", isAuthenticated, authorize('admin'), async (req, res, next) => {
     try{
         const { first_name, last_name, age, email, password, cart,role } = req.body || {};
         if (!first_name || !last_name || age == null || !email || !password) {
             return res.status(422).json({ message: 'first_name, last_name, age, email, password are mandatory' });
         }
-        const user = await User.create({ first_name, last_name, age, email, password, cart: cart || 0, role: role || 'user' });
+        const user = await User.create({ first_name, last_name, age, email, password, cart: cart || null, role: role || 'user' });
         res.status(201).location(`/api/users/${user._id}`).json({ 
             id: user._id, first_name: user.first_name, last_name: user.last_name, email: user.email, role: user.role, age: user.age 
         });
@@ -66,7 +67,7 @@ usersRouter.post("/", isAuthenticated, authorize('admin'), async (req, res, next
 });
 
 // PUT /api/users/:id (solo admin) 
-usersRouter.put( "/:id", isAuthenticated, authorize('admin'), async(req,res,next)=>{
+usersRoutes.put( "/:id", isAuthenticated, authorize('admin'), async(req,res,next)=>{
     try{
         const { first_name, last_name, age, email, cart,role } = req.body || {};
         if (!first_name || !last_name || age == null || !email || !password) {
@@ -83,7 +84,7 @@ usersRouter.put( "/:id", isAuthenticated, authorize('admin'), async(req,res,next
     } catch (err) { next(err);} 
 });
 
-usersRouter.patch( "/:id", isAuthenticated, authorize('admin'), async(req,res,next)=>{
+usersRoutes.patch( "/:id", isAuthenticated, authorize('admin'), async(req,res,next)=>{
     try{
         const allowed = [ "first_name", "last_name", "age", "email", "cart", "role" ];
         const $set = Object.fromEntries(
@@ -102,7 +103,7 @@ usersRouter.patch( "/:id", isAuthenticated, authorize('admin'), async(req,res,ne
 
 
 // DELETE /api/users/:id (solo admin)
-usersRouter.delete( "/id", isAuthenticated, authorize('admin'), async( req,res,next ) => {
+usersRoutes.delete( "/id", isAuthenticated, authorize('admin'), async( req,res,next ) => {
     try{
         const id = req.params.id;
         const deleted = await User.findByIdAndDelete(id).lean();

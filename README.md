@@ -12,6 +12,7 @@ II**, donde se implementa:
 -   Autenticación y autorización utilizando **Passport**\
 -   Generación de **JWT** para manejo de sesiones\
 -   Validación del usuario autenticado mediante `/api/sessions/current`
+-   Rutas para frontend utilizando Handlebars
 
 ------------------------------------------------------------------------
 
@@ -54,9 +55,47 @@ mediante un link de Drive**, que contiene las credenciales seguras.
 
 ------------------------------------------------------------------------
 
+---
+
+## 🛣️ Rutas de la API
+
+### Sesiones
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/sessions/register` | Registrar un nuevo usuario (**solo admin**) |
+| POST | `/api/sessions/login` | Login de usuario y creación de JWT |
+| GET  | `/api/sessions/current` | Devuelve los datos del usuario logueado en formato JSON |
+| GET  | `/api/sessions/logout` | Logout y eliminación de la cookie de sesión |
+
+### Usuarios
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET  | `/api/users/` | Listar todos los usuarios (**solo admin**) |
+
+---
+
+## 🌐 Rutas Frontend (Handlebars)
+
+| Ruta | Descripción |
+|------|-------------|
+| `/login` | Formulario de login |
+| `/register` | Formulario de registro (**solo admin**) |
+| `/current` | Página que muestra los datos del usuario logueado |
+| `/logout` | Logout y redirección al login |
+
+---
+
 ## ▶️ Iniciar el Proyecto
 
-``` bash
+```bash
 npm run start
 ```
+
+Luego abrir en el navegador:  
+
+- `http://localhost:3000/login` → Login  
+- `http://localhost:3000/register` → Registro  
+- `http://localhost:3000/current` → Perfil del usuario logueado 
 

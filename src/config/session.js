@@ -2,11 +2,11 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 
  export function createSessionMW () {
-    const { SESSION_SECRET, MONGODB_URI, SESSION_TTL_MIN } = process.env;
+    const { SESSION_SECRET, MONGODB_URI, MONGO_DB, SESSION_TTL_MIN } = process.env;
     if ( !SESSION_SECRET ) { throw new Error("SESSION_SECRET is not defined in environment variables"); }
 
     const store = MongoStore.create({
-        mongoUrl : MONGODB_URI + 'backend2',
+        mongoUrl : MONGODB_URI + MONGO_DB,
         ttl : Number ( SESSION_TTL_MIN * 60 ),
         autoRemove : 'interval',
         autoRemoveInterval : 10

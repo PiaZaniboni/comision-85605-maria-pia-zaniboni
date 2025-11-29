@@ -4,13 +4,15 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import passport from './config/passport.js';
+import { engine } from 'express-handlebars';
+import { initPassport } from './config/passport.js';
 
-import { createSessionMW } from "./config/session.js";
 import { sessionRoutes }  from  "./routes/sessions.routes.js";
 import { protectedRoutes }   from  "./routes/protected.routes.js";
-import { usersRouter } from "./routes/users.routes.js";
+import { usersRoutes } from "./routes/users.routes.js";
+import { viewsRoutes } from "./routes/views.routes.js";
 
+import { attachUserFromCookie } from './middlewares/auth-cookie.js';
 import erroHandler from "./middlewares/error.handler.js";
 
 const app = express();
@@ -22,13 +24,20 @@ app.use(morgan("dev")); //Logs https
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-//Sesiones
-app.use(cookieParser());
-app.use(createSessionMW());
+/* Cookies firmadas; necesarias para leer las cookie desde  req.signedCookies */
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
-//Passport
-app.use(passport.initialize());
-app.use(passport.session());
+//Css
+app.use(express.static('public'));
+
+//Handlebars
+app.engine('handlebars', engine());
+app.set('view engine', 'handlebars');
+app.set('views', './src/views');
+
+// Passport stateless
+initPassport(app)
+app.use(attachUserFromCookie);
 
 //health, ruta para ver que la api esta en funcionamiento
 app.get("/health", (_req,res)=> res.json({ok:true}));
@@ -36,8 +45,8 @@ app.get("/health", (_req,res)=> res.json({ok:true}));
 //Router
 app.use("/api/sessions", sessionRoutes);
 app.use("/private", protectedRoutes);
-app.use("/api/users", usersRouter);
-
+app.use("/api/users", usersRoutes);
+app.use("/", viewsRoutes); 
 
 //404
 app.use( (_req, res) => res.status(404).json({ message: 'Page not found' }) );
