@@ -30,8 +30,8 @@ app.get("/health", (_req,res)=> res.json({ok:true}));
 
 //Router
 app.use("/api/sessions", sessionRoutes);
+app.use("/private", protectedRoutes);
 app.use("/api/users", usersRouter);
-app.use("/", protectedRoutes);
 
 
 //404

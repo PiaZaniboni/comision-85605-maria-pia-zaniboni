@@ -15,22 +15,18 @@ sessionRoutes.post('/register', async (req, res, next) => {
 
         const normEmail = String(email).toLowerCase().trim();
 
-        //Fijo demo
-        const isAdmin = (normEmail === 'adminCoder@coder.com' && password === 'adminCod3r123');
-
-        //Usuario normal
         const user = await User.create({
             first_name,
             last_name,
             email: normEmail,
             age,
             password,
-            cart,
-            role: isAdmin ? 'admin' : 'user'
+            cart
         });
         res.status(201).json({ ok: true, id: user._id });
 
     } catch (err) {
+        if (err?.code === 11000) return res.status(409).json({ message: 'Email already registered' });
         return next(err);
     }
 });
@@ -46,17 +42,17 @@ sessionRoutes.post('/login', async (req, res, next) => {
 
         const normEmail = String(email).toLowerCase().trim();
 
-        if (normEmail === 'adminCoder@coder.com' && password === 'adminCod3r123') {
-            req.session.user = { email: normEmail, name: 'Admin Coder', role: 'admin' };
-            return res.json({ ok: true });
-        }
-
-        //Usuario normal
         const user = await User.findOne({ email: normEmail });
 
         if (!user || !(await user.comparePassword(password))) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
+
+        //Previene sesion fixation
+        req.session.regenerate(err => {
+            if (err) return next(err);
+        });
+
         req.session.user = {
             id: user._id.toString(),
             email: user.email,
@@ -66,4 +62,27 @@ sessionRoutes.post('/login', async (req, res, next) => {
         return res.json({ ok: true });
 
     } catch (e) { next(e); }
+});
+
+//Rutas privadas
+function isAuthenticated(req, res, next) {
+  if (req.session?.user) {
+    console.log('[AUTH] ok', { email: req.session.user.email });
+    return next();
+  }
+  console.log('[AUTH] 401');
+  return res.status(401).json({ message: 'Unauthorized' });
+}
+// Get me - privada
+sessionRoutes.get('/me', isAuthenticated, (req, res) => {
+    res.json({ user: req.session.user });
+});
+
+//Log out
+sessionRoutes.get('/logout', (req, res, next) => {
+    req.session.destroy(err => {
+        if (err) return next(err);
+        res.clearCookie('connect.sid');
+        res.json({ ok: true, message: 'Logged out' });
+    });
 });
