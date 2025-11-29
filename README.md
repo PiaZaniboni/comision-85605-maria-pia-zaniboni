@@ -7,10 +7,10 @@
 Este repositorio corresponde a la **Entrega 1** de la materia **Backend
 II**, donde se implementa:
 
--   CRUD de usuarios\
--   Registro con contraseña encriptada con **bcrypt**\
--   Autenticación y autorización utilizando **Passport**\
--   Generación de **JWT** para manejo de sesiones\
+-   CRUD de usuarios
+-   Registro con contraseña encriptada con **bcrypt**
+-   Autenticación y autorización utilizando **Passport**
+-   Generación de **JWT** para manejo de sesiones
 -   Validación del usuario autenticado mediante `/api/sessions/current`
 -   Rutas para frontend utilizando Handlebars
 
@@ -55,8 +55,6 @@ mediante un link de Drive**, que contiene las credenciales seguras.
 
 ------------------------------------------------------------------------
 
----
-
 ## 🛣️ Rutas de la API
 
 ### Sesiones
@@ -74,15 +72,15 @@ mediante un link de Drive**, que contiene las credenciales seguras.
 |--------|------|-------------|
 | GET  | `/api/users/` | Listar todos los usuarios (**solo admin**) |
 
----
+------------------------------------------------------------------------
 
 ## 🌐 Rutas Frontend (Handlebars)
 
 | Ruta | Descripción |
 |------|-------------|
-| `/login` | Formulario de login |
-| `/register` | Formulario de registro (**solo admin**) |
-| `/current` | Página que muestra los datos del usuario logueado |
+| [Login](http://localhost:3000/login) | Formulario de login |
+| [Registro](http://localhost:3000/register) | Formulario de registro |
+| [Perfil](http://localhost:3000/current) | Página que muestra los datos del usuario logueado |
 | `/logout` | Logout y redirección al login |
 
 ---
@@ -95,7 +93,7 @@ npm run start
 
 Luego abrir en el navegador:  
 
-- `http://localhost:3000/login` → Login  
-- `http://localhost:3000/register` → Registro  
-- `http://localhost:3000/current` → Perfil del usuario logueado 
+- [Login](http://localhost:3000/login)  
+- [Registro](http://localhost:3000/register)  
+- [Perfil](http://localhost:3000/current)  
 

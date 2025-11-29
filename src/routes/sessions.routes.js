@@ -76,7 +76,7 @@ sessionRoutes.post('/login', (req, res, next) => {
 // CURRENT - privada
 sessionRoutes.get('/current', (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "Not authenticated" });
   }
 
   res.json({
